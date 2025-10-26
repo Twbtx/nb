@@ -1,0 +1,150 @@
+-- 修复后的完整代码
+local success, WindUI = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/dist/main.lua"))()
+end)
+
+if not success or not WindUI then
+    warn("WindUI库加载失败! 尝试备用源...")
+    -- 尝试备用源
+    WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/source.lua"))()
+    if not WindUI then
+        error("无法加载WindUI库")
+        return
+    end
+end
+
+print("WindUI加载成功，版本:", WindUI.Version)
+
+-- 应用设置
+WindUI.TransparencyValue = 0.2
+WindUI:SetTheme("Dark")
+
+-- 创建窗口（简化版）
+local Window = WindUI:CreateWindow({
+    Title = "WindUI 脚本中心",
+    Icon = "palette",
+    Author = "欢迎使用 WindUI!",
+    Folder = "WindUI_Example",
+    Size = UDim2.fromOffset(700, 500),
+    Theme = "Dark"
+})
+
+-- 添加标签
+pcall(function()
+    Window:Tag({
+        Title = "v1.6.4",
+        Color = Color3.fromHex("#30ff6a")
+    })
+    
+    Window:Tag({
+        Title = "脚本库",
+    })
+end)
+
+-- 尝试创建顶部按钮
+local function createTopbarButtons()
+    local success, result = pcall(function()
+        -- 主题切换按钮
+        Window:CreateTopbarButton("theme-switcher", "moon", function()
+            local newTheme = WindUI:GetCurrentTheme() == "Dark" and "Light" or "Dark"
+            WindUI:SetTheme(newTheme)
+            WindUI:Notify({
+                Title = "主题已更改",
+                Content = "当前主题: " .. newTheme,
+                Duration = 2
+            })
+        end, 990)
+        
+        -- 设置按钮
+        Window:CreateTopbarButton("settings", "settings", function()
+            WindUI:Notify({
+                Title = "设置",
+                Content = "打开设置面板",
+                Duration = 2
+            })
+        end, 980)
+        
+        return true
+    end)
+    
+    if success then
+        print("顶部按钮创建成功")
+    else
+        print("顶部按钮创建失败:", result)
+        -- 创建替代的界面元素
+        createAlternativeControls()
+    end
+end
+
+-- 备用控制方案
+local function createAlternativeControls()
+    print("使用备用控制方案...")
+    
+    -- 在设置标签页中添加主题切换
+    local settingsTab = TabHandles.Appearance
+    if settingsTab then
+        settingsTab:Button({
+            Title = "切换主题",
+            Icon = "moon",
+            Callback = function()
+                local newTheme = WindUI:GetCurrentTheme() == "Dark" and "Light" or "Dark"
+                WindUI:SetTheme(newTheme)
+                WindUI:Notify({
+                    Title = "主题已更改",
+                    Content = "当前主题: " .. newTheme,
+                    Duration = 2
+                })
+            end
+        })
+    end
+end
+
+-- 创建标签页结构
+local Tabs = {
+    Main = Window:Section({ Title = "功能", Opened = true }),
+    Settings = Window:Section({ Title = "设置", Opened = true }),
+    ScriptHub = Window:Section({ Title = "脚本中心", Opened = true })
+}
+
+local TabHandles = {
+    Elements = Tabs.Main:Tab({ Title = "UI元素", Icon = "layout-grid" }),
+    Appearance = Tabs.Settings:Tab({ Title = "外观", Icon = "brush" }),
+    UniversalScripts = Tabs.ScriptHub:Tab({ Title = "通用功能", Icon = "zap" })
+}
+
+-- 测试基础功能
+TabHandles.Elements:Button({
+    Title = "测试按钮",
+    Icon = "check",
+    Callback = function()
+        WindUI:Notify({
+            Title = "测试成功",
+            Content = "基础功能正常工作",
+            Duration = 3
+        })
+    end
+})
+
+-- 外观设置
+TabHandles.Appearance:Dropdown({
+    Title = "选择主题",
+    Values = {"Dark", "Light", "Blue", "Red"},
+    Value = "Dark",
+    Callback = function(theme)
+        WindUI:SetTheme(theme)
+    end
+})
+
+-- 尝试创建顶部按钮
+createTopbarButtons()
+
+-- 窗口事件
+Window:OnClose(function()
+    print("窗口已关闭")
+end)
+
+Window:OnDestroy(function()
+    print("窗口已销毁")
+end)
+
+print("WindUI界面初始化完成")
